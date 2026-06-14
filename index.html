@@ -281,12 +281,49 @@ nav{position:fixed;top:0;left:0;right:0;z-index:500;height:64px;
 .success-box.show{display:block;}
 
 @media(max-width:900px){
-  .home-grid,.contact-grid{grid-template-columns:1fr;}
-  .svc-cards,.work-grid{grid-template-columns:1fr;}
-  .pricing-grid{grid-template-columns:1fr;overflow-y:auto;}
+  nav{padding:0 5%;height:52px;}
   nav .nav-tabs,.nav-cta-btn{display:none;}
-  .page{padding:20px 4% 16px;}
+  .page{padding:16px 5% 80px;overflow-y:auto;overflow-x:hidden;}
+  .home-grid{grid-template-columns:1fr;gap:28px;}
+  .home-bg-text{font-size:22vw;bottom:-4px;right:-5px;}
+  .home-h1{font-size:clamp(2.4rem,10vw,3.5rem);}
+  .home-btns{flex-direction:column;gap:10px;}
+  .btn-r,.btn-ghost{width:100%;justify-content:center;}
+  .work-grid{grid-template-columns:1fr;}
+  .pricing-grid{grid-template-columns:1fr;gap:14px;overflow-y:auto;}
+  .price-card{padding:22px 18px;}
+  .popular-badge{top:12px;right:12px;font-size:0.6rem;}
+  .contact-grid{grid-template-columns:1fr;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+  .cd-row{flex-direction:column;gap:8px;}
+  #p-contact{overflow-y:auto;overflow-x:hidden;}
+  .contact-form-col{overflow:visible;padding-right:0;padding-bottom:20px;}
+  .contact-h{font-size:clamp(1.6rem,7vw,2.4rem);}
+  .contact-sub{margin-bottom:16px;}
+  .next-steps{gap:10px;margin-bottom:4px;}
+  .ns-info h5{font-size:0.8rem;}
+  .ns-info p{font-size:0.72rem;}
+  .page-h2{font-size:clamp(1.8rem,8vw,2.8rem);margin-bottom:14px;}
+  #mobile-nav{display:flex;}
 }
+#mobile-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(8,8,10,0.96);
+  backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,0.07);
+  z-index:999;
+  justify-content:space-around;
+  align-items:center;
+  padding:10px 0 max(10px,env(safe-area-inset-bottom));
+}
+.mnav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;cursor:pointer;padding:4px 8px;
+  color:var(--muted);font-size:0.6rem;font-weight:600;letter-spacing:0.05em;
+  text-transform:uppercase;transition:color .2s;
+}
+.mnav-btn.active,.mnav-btn:hover{color:var(--red);}
+.mnav-icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 </style>
 </head>
 <body>
@@ -416,7 +453,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:500;height:64px;
         <div class="price-name">Starter</div>
         <div class="price-amount">
           <span class="price-rs">&#8377;</span>
-          <span class="price-val">10,000</span>
+          <span class="price-val">9,999</span>
           <span class="price-period">/ month</span>
         </div>
         <div class="price-desc">Strategy-only plan. We build the playbook, you execute it. Great entry point.</div>
@@ -434,7 +471,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:500;height:64px;
         <div class="price-name">Growth Partner</div>
         <div class="price-amount">
           <span class="price-rs">&#8377;</span>
-          <span class="price-val">15,000</span>
+          <span class="price-val">15,999</span>
           <span class="price-period">/ month</span>
         </div>
         <div class="price-desc">Strategy + execution. We handle content, ads, WhatsApp and leads while you focus on your business.</div>
@@ -452,7 +489,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:500;height:64px;
         <div class="price-name">Full-Stack Retainer</div>
         <div class="price-amount">
           <span class="price-rs">&#8377;</span>
-          <span class="price-val">28,000</span>
+          <span class="price-val">29,999</span>
           <span class="price-period">/ month</span>
         </div>
         <div class="price-desc">Everything handled end-to-end. Website, content, ads, Google, WhatsApp, leads &mdash; the whole growth engine.</div>
@@ -534,6 +571,10 @@ const pages=document.querySelectorAll('.page');
 const tabs=document.querySelectorAll('.nav-tab');
 const dots=document.querySelectorAll('.dot');
 function goPage(n){
+  // sync mobile nav
+  document.querySelectorAll('.mnav-btn').forEach((b,i)=>{
+    b.classList.toggle('active', i===n);
+  });
   if(n===curPage)return;
   pages[curPage].classList.remove('active');
   pages[curPage].classList.add('exit-left');
@@ -563,14 +604,16 @@ function sendForm(){
   ['fn','fb','fp','fc'].forEach(id=>document.getElementById(id).value='');
 }
 
-// INTRO
+// INTRO - skip entirely on mobile
 const introEl=document.getElementById('intro');
 const appEl=document.getElementById('app');
+const isMobile = window.innerWidth <= 900 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+if(isMobile){ introEl.style.display='none'; appEl.classList.add('live'); }
 const logoEl=document.getElementById('intro-logo');
 const taglineEl=document.getElementById('intro-tagline');
 const canvas=document.getElementById('intro-canvas');
-const ctx=canvas.getContext('2d');
-canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+const ctx=isMobile ? null : canvas.getContext('2d');
+if(!isMobile){ canvas.width=window.innerWidth;canvas.height=window.innerHeight; }
 
 let particles=[];
 class P{
@@ -589,10 +632,10 @@ class P{
   draw(){ctx.save();ctx.globalAlpha=Math.max(0,this.life);ctx.fillStyle=`rgb(${this.color})`;ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();ctx.restore();}
 }
 
-for(let i=0;i<80;i++)setTimeout(()=>particles.push(new P(Math.random()*canvas.width,Math.random()*canvas.height,false)),i*40);
+if(!isMobile){for(let i=0;i<80;i++)setTimeout(()=>particles.push(new P(Math.random()*canvas.width,Math.random()*canvas.height,false)),i*40);}
 
-let animRunning=true;
-(function loop(){
+let animRunning=!isMobile;
+if(!isMobile)(function loop(){
   if(!animRunning)return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   if(particles.length<120)particles.push(new P(Math.random()*canvas.width,canvas.height+10,false));
@@ -613,7 +656,7 @@ function finishIntro(){
 }
 function skipIntro(){finishIntro();}
 
-window.addEventListener('load',()=>setTimeout(()=>{
+if(!isMobile)window.addEventListener('load',()=>setTimeout(()=>{
   setTimeout(()=>{
     logoEl.style.transition='transform 0.8s cubic-bezier(0.34,1.56,0.64,1),opacity 0.5s ease,filter 0.8s ease';
     logoEl.style.opacity='1';logoEl.style.transform='scale(1) rotate(0deg)';
@@ -643,5 +686,26 @@ window.addEventListener('load',()=>setTimeout(()=>{
   setTimeout(()=>finishIntro(),2900);
 },200));
 </script>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav id="mobile-nav">
+  <button class="mnav-btn active" onclick="goPage(0)" id="mn0">
+    <svg class="mnav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button class="mnav-btn" onclick="goPage(1)" id="mn1">
+    <svg class="mnav-icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    Work
+  </button>
+  <button class="mnav-btn" onclick="goPage(2)" id="mn2">
+    <svg class="mnav-icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    Pricing
+  </button>
+  <button class="mnav-btn" onclick="goPage(3)" id="mn3">
+    <svg class="mnav-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Contact
+  </button>
+</nav>
+
 </body>
 </html>
